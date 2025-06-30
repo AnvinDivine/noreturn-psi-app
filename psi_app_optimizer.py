@@ -27,13 +27,15 @@ def optimize_psi_use(total_dice, difficulty, required_kraftstufen):
             if kraftstufen < required_kraftstufen:
                 continue
 
-            min_target = base_min - zielbereich_erweiterung
-            max_target = base_max + zielbereich_erweiterung
-            min_target = max(1, min_target)
-            max_target = min(6 * num_rolled, max_target)
+            # Zielbereich logisch berechnen (für Anzeige)
+            min_target_raw = base_min - zielbereich_erweiterung
+            max_target_raw = base_max + zielbereich_erweiterung
 
-            # Neue Gültigkeitsprüfung: Zielbereich muss erreichbar sein
-            if max_target < min_target or max_target < 1 or min_target > 6 * num_rolled:
+            # Grenzen zur Berechnung einschränken
+            min_target_calc = max(1, min_target_raw)
+            max_target_calc = min(6 * num_rolled, max_target_raw)
+
+            if min_target_calc > max_target_calc:
                 continue
 
             if num_rolled > 8:
@@ -41,7 +43,7 @@ def optimize_psi_use(total_dice, difficulty, required_kraftstufen):
                 success_count = 0
                 for _ in range(trials):
                     roll = sum(random.randint(1, 6) for _ in range(num_rolled))
-                    if min_target <= roll <= max_target:
+                    if min_target_calc <= roll <= max_target_calc:
                         success_count += 1
                 success_rate = success_count / trials
             else:
@@ -50,7 +52,7 @@ def optimize_psi_use(total_dice, difficulty, required_kraftstufen):
                 success = 0
                 for outcome in outcomes:
                     total += 1
-                    if min_target <= sum(outcome) <= max_target:
+                    if min_target_calc <= sum(outcome) <= max_target_calc:
                         success += 1
                 success_rate = success / total if total > 0 else 0
 
@@ -61,7 +63,7 @@ def optimize_psi_use(total_dice, difficulty, required_kraftstufen):
                     "würfel_werfen": num_rolled,
                     "zielbereich_erweitern": zielbereich_erweiterung,
                     "kraftstufen": kraftstufen,
-                    "zielbereich": [min_target, max_target],
+                    "zielbereich": [min_target_raw, max_target_raw],
                     "erfolgswahrscheinlichkeit": round(success_rate * 100, 2)
                 }
 
@@ -127,6 +129,6 @@ if submitted:
 
         col4, col5 = st.columns(2)
         with col4:
-            st.markdown(f"<div class='custom-card'><h3>🎯 Zielbereich</h3><p>{result['zielbereich'][0]} – {result['zielbereich'][1]}</p></div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='custom-card'><h3>🌟 Zielbereich</h3><p>{result['zielbereich'][0]} – {result['zielbereich'][1]}</p></div>", unsafe_allow_html=True)
         with col5:
             st.markdown(f"<div class='custom-card'><h3>✅ Erfolgswahrscheinlichkeit</h3><p>{result['erfolgswahrscheinlichkeit']}%</p></div>", unsafe_allow_html=True)
