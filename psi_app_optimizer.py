@@ -32,6 +32,10 @@ def optimize_psi_use(total_dice, difficulty, required_kraftstufen):
             min_target = max(1, min_target)
             max_target = min(6 * num_rolled, max_target)
 
+            # Neue Gültigkeitsprüfung: Zielbereich muss erreichbar sein
+            if max_target < min_target or max_target < 1 or min_target > 6 * num_rolled:
+                continue
+
             if num_rolled > 8:
                 trials = 100000
                 success_count = 0
