@@ -65,6 +65,15 @@ def optimize_psi_use(total_dice, difficulty, required_kraftstufen):
 
 # Streamlit UI
 st.set_page_config(page_title="NoReturn PSI-Optimierer", layout="centered")
+st.markdown("""
+    <style>
+        .metric-label, .metric-value {
+            color: white !important;
+            text-shadow: 1px 1px 2px black;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 st.title("🧠 NoReturn PSI-Optimierer")
 st.markdown("""
 <p style='font-size:18px;'>
