@@ -67,15 +67,23 @@ def optimize_psi_use(total_dice, difficulty, required_kraftstufen):
 st.set_page_config(page_title="NoReturn PSI-Optimierer", layout="centered")
 st.markdown("""
     <style>
-        [data-testid="metric-container"] {
+        .custom-card {
+            background-color: #222;
             color: white;
-            text-shadow: 1px 1px 2px black;
-            background-color: rgba(255, 255, 255, 0.05);
             padding: 1rem;
             border-radius: 0.5rem;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(255,255,255,0.1);
         }
-        [data-testid="metric-container"] svg {
-            color: white;
+        .custom-card h3 {
+            margin-bottom: 0.25rem;
+            font-size: 1rem;
+            color: #aaa;
+        }
+        .custom-card p {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -104,10 +112,17 @@ if submitted:
         st.error(result["error"])
     else:
         st.success("Beste Kombination gefunden:")
+
         col1, col2, col3 = st.columns(3)
-        col1.metric("🎲 Geworfene Würfel", result["würfel_werfen"])
-        col2.metric("➕ Zielbereich erweitern", result["zielbereich_erweitern"])
-        col3.metric("⚡ Kraftstufen", result["kraftstufen"])
-        st.metric("🎯 Zielbereich", f"{result['zielbereich'][0]}–{result['zielbereich'][1]}")
-        st.metric("✅ Erfolgswahrscheinlichkeit", f"{result['erfolgswahrscheinlichkeit']} %")
-        style_metric_cards()
+        with col1:
+            st.markdown(f"<div class='custom-card'><h3>🎲 Geworfene Würfel</h3><p>{result['würfel_werfen']}</p></div>", unsafe_allow_html=True)
+        with col2:
+            st.markdown(f"<div class='custom-card'><h3>➕ Zielbereich erweitern</h3><p>{result['zielbereich_erweitern']}</p></div>", unsafe_allow_html=True)
+        with col3:
+            st.markdown(f"<div class='custom-card'><h3>⚡ Kraftstufen</h3><p>{result['kraftstufen']}</p></div>", unsafe_allow_html=True)
+
+        col4, col5 = st.columns(2)
+        with col4:
+            st.markdown(f"<div class='custom-card'><h3>🎯 Zielbereich</h3><p>{result['zielbereich'][0]} – {result['zielbereich'][1]}</p></div>", unsafe_allow_html=True)
+        with col5:
+            st.markdown(f"<div class='custom-card'><h3>✅ Erfolgswahrscheinlichkeit</h3><p>{result['erfolgswahrscheinlichkeit']}%</p></div>", unsafe_allow_html=True)
