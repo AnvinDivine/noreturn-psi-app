@@ -67,9 +67,15 @@ def optimize_psi_use(total_dice, difficulty, required_kraftstufen):
 st.set_page_config(page_title="NoReturn PSI-Optimierer", layout="centered")
 st.markdown("""
     <style>
-        .metric-label, .metric-value {
-            color: white !important;
+        [data-testid="metric-container"] {
+            color: white;
             text-shadow: 1px 1px 2px black;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        [data-testid="metric-container"] svg {
+            color: white;
         }
     </style>
 """, unsafe_allow_html=True)
