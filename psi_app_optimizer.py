@@ -47,7 +47,7 @@ def optimize_psi_use(total_dice, difficulty, required_kraftstufen):
                 continue
 
             # Wahrscheinlichkeitsberechnung via Monte Carlo
-            trials = 100000
+            trials = 10000
             success_count = 0
             for _ in range(trials):
                 rolls = [roll_hazard_die()] + [random.randint(1, 6) for _ in range(num_rolled - 1)]
