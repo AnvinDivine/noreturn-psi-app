@@ -1,5 +1,3 @@
-import itertools
-import math
 import random
 import streamlit as st
 from streamlit_extras.metric_cards import style_metric_cards
@@ -9,13 +7,25 @@ target_ranges = {
     "leicht": (8, 12),
     "mittel": (11, 15),
     "schwer": (15, 19),
+    "sehr schwer": (19, 22),
     "ultimativ": (23, 25),
 }
 
+# Hazard-Die Funktion
+def roll_hazard_die():
+    total = 0
+    while True:
+        r = random.randint(1, 6)
+        total += r
+        if r < 6:
+            break
+    return total
+
+# Hauptfunktion zur Optimierung
 def optimize_psi_use(total_dice, difficulty, required_kraftstufen):
     difficulty = difficulty.lower()
     if difficulty not in target_ranges:
-        return {"error": "Ungültige Schwierigkeit. Erlaubt: leicht, mittel, schwer, ultimativ."}
+        return {"error": "Ungültige Schwierigkeit. Erlaubt: leicht, mittel, schwer, sehr schwer, ultimativ."}
 
     base_min, base_max = target_ranges[difficulty]
     best_option = None
@@ -27,34 +37,24 @@ def optimize_psi_use(total_dice, difficulty, required_kraftstufen):
             if kraftstufen < required_kraftstufen:
                 continue
 
-            # Zielbereich logisch berechnen (für Anzeige)
+            # Zielbereich für Anzeige und Berechnung
             min_target_raw = base_min - zielbereich_erweiterung
             max_target_raw = base_max + zielbereich_erweiterung
-
-            # Grenzen zur Berechnung einschränken
             min_target_calc = max(1, min_target_raw)
-            max_target_calc = min(6 * num_rolled, max_target_raw)
+            max_target_calc = min(6 * num_rolled + 12, max_target_raw)  # +12 als grober Max-Puffer durch Hazard-Die
 
             if min_target_calc > max_target_calc:
                 continue
 
-            if num_rolled > 8:
-                trials = 100000
-                success_count = 0
-                for _ in range(trials):
-                    roll = sum(random.randint(1, 6) for _ in range(num_rolled))
-                    if min_target_calc <= roll <= max_target_calc:
-                        success_count += 1
-                success_rate = success_count / trials
-            else:
-                outcomes = itertools.product(range(1, 7), repeat=num_rolled)
-                total = 0
-                success = 0
-                for outcome in outcomes:
-                    total += 1
-                    if min_target_calc <= sum(outcome) <= max_target_calc:
-                        success += 1
-                success_rate = success / total if total > 0 else 0
+            # Wahrscheinlichkeitsberechnung via Monte Carlo
+            trials = 100000
+            success_count = 0
+            for _ in range(trials):
+                rolls = [roll_hazard_die()] + [random.randint(1, 6) for _ in range(num_rolled - 1)]
+                total_roll = sum(rolls)
+                if min_target_calc <= total_roll <= max_target_calc:
+                    success_count += 1
+            success_rate = success_count / trials
 
             if success_rate > best_success_rate:
                 best_success_rate = success_rate
@@ -107,8 +107,11 @@ with st.form("psi_form"):
         total_dice = st.slider("Verfügbare Wü6", min_value=1, max_value=20, value=6)
         required_kraftstufen = st.slider("Gewünschte Kraftstufen", min_value=1, max_value=10, value=1)
     with col2:
-        difficulty = st.selectbox("Schwierigkeit der App", ["leicht", "mittel", "schwer", "ultimativ"])
-        st.markdown("""<small>Leicht: 8–12 | Mittel: 11–15 | Schwer: 15–19 | Ultimativ: 23–25</small>""", unsafe_allow_html=True)
+        difficulty = st.selectbox(
+            "Schwierigkeit der App",
+            ["leicht", "mittel", "schwer", "sehr schwer", "ultimativ"]
+        )
+        st.markdown("""<small>Leicht: 8–12 | Mittel: 11–15 | Schwer: 15–19 | Sehr schwer: 19–22 | Ultimativ: 23–25</small>""", unsafe_allow_html=True)
 
     submitted = st.form_submit_button("🔍 Optimieren")
 
